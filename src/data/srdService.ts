@@ -180,3 +180,23 @@ export function filterLegalDomainCards(
       card.level <= maxLevel
   ).sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 }
+
+export function getDomainCards(filter?: {
+  domain?: Domain;
+  level?: number;
+  maxLevel?: number;
+  search?: string;
+}): DomainCard[] {
+  return DOMAIN_CARDS.filter((card) => {
+    if (filter?.domain && card.domain !== filter.domain) return false;
+    if (filter?.level !== undefined && card.level !== filter.level) return false;
+    if (filter?.maxLevel !== undefined && card.level > filter.maxLevel) return false;
+    if (filter?.search) {
+      const q = filter.search.toLowerCase();
+      const match = card.name.toLowerCase().includes(q) || card.text.toLowerCase().includes(q);
+      if (!match) return false;
+    }
+    return true;
+  });
+}
+
