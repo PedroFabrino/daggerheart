@@ -6,6 +6,7 @@ import { ExperiencesList } from './ExperiencesList';
 import { WeaponsAndEquipment } from './WeaponsAndEquipment';
 
 import { CardTray } from '../cards/CardTray';
+import { LevelUpModal } from '../levelup/LevelUpModal';
 
 interface CharacterSheetProps {
   character: Character;
@@ -24,12 +25,21 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   isHouseRulesEnabled,
   onToggleHouseRules,
 }) => {
+  const [isLevelUpModalOpen, setIsLevelUpModalOpen] = React.useState<boolean>(false);
+
+  const handleOpenLevelUp = () => {
+    if (onOpenLevelUp) {
+      onOpenLevelUp();
+    }
+    setIsLevelUpModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* 1. Character Identity & Traits Header */}
       <CharacterHeader
         character={character}
-        onOpenLevelUp={onOpenLevelUp}
+        onOpenLevelUp={handleOpenLevelUp}
         onOpenRest={onOpenRest}
         isHouseRulesEnabled={isHouseRulesEnabled}
         onToggleHouseRules={onToggleHouseRules}
@@ -53,6 +63,20 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
         character={character}
         onUpdate={(updated) => onUpdate(() => updated)}
       />
+
+      {/* Level Up Assistant Modal */}
+      {isLevelUpModalOpen && (
+        <LevelUpModal
+          character={character}
+          onConfirm={(updated) => {
+            onUpdate(() => updated);
+            setIsLevelUpModalOpen(false);
+          }}
+          onClose={() => setIsLevelUpModalOpen(false)}
+          isHouseRulesEnabled={isHouseRulesEnabled}
+          onToggleHouseRules={onToggleHouseRules}
+        />
+      )}
     </div>
   );
 };

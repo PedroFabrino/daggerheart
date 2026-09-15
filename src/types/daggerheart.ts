@@ -17,6 +17,15 @@ export type TraitName =
   | 'Presence'
   | 'Knowledge';
 
+export const TRAIT_NAMES: TraitName[] = [
+  'Agility',
+  'Strength',
+  'Finesse',
+  'Instinct',
+  'Presence',
+  'Knowledge',
+];
+
 export type CardType = 'Spell' | 'Ability' | 'Grimoire';
 
 export interface DomainCard {
