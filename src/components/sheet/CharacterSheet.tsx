@@ -7,6 +7,8 @@ import { WeaponsAndEquipment } from './WeaponsAndEquipment';
 
 import { CardTray } from '../cards/CardTray';
 import { LevelUpModal } from '../levelup/LevelUpModal';
+import { RestModal } from '../rest/RestModal';
+import { DualityDiceModal } from '../dice/DualityDiceModal';
 
 interface CharacterSheetProps {
   character: Character;
@@ -26,6 +28,8 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
   onToggleHouseRules,
 }) => {
   const [isLevelUpModalOpen, setIsLevelUpModalOpen] = React.useState<boolean>(false);
+  const [isRestModalOpen, setIsRestModalOpen] = React.useState<boolean>(false);
+  const [isDiceModalOpen, setIsDiceModalOpen] = React.useState<boolean>(false);
 
   const handleOpenLevelUp = () => {
     if (onOpenLevelUp) {
@@ -34,13 +38,21 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
     setIsLevelUpModalOpen(true);
   };
 
+  const handleOpenRest = () => {
+    if (onOpenRest) {
+      onOpenRest();
+    }
+    setIsRestModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* 1. Character Identity & Traits Header */}
       <CharacterHeader
         character={character}
         onOpenLevelUp={handleOpenLevelUp}
-        onOpenRest={onOpenRest}
+        onOpenRest={handleOpenRest}
+        onOpenDiceRoll={() => setIsDiceModalOpen(true)}
         isHouseRulesEnabled={isHouseRulesEnabled}
         onToggleHouseRules={onToggleHouseRules}
       />
@@ -75,6 +87,26 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           onClose={() => setIsLevelUpModalOpen(false)}
           isHouseRulesEnabled={isHouseRulesEnabled}
           onToggleHouseRules={onToggleHouseRules}
+        />
+      )}
+
+      {/* Rest Recovery Modal */}
+      {isRestModalOpen && (
+        <RestModal
+          character={character}
+          onConfirm={(updated) => {
+            onUpdate(() => updated);
+            setIsRestModalOpen(false);
+          }}
+          onClose={() => setIsRestModalOpen(false)}
+        />
+      )}
+
+      {/* Optional Duality Dice Roller Modal */}
+      {isDiceModalOpen && (
+        <DualityDiceModal
+          character={character}
+          onClose={() => setIsDiceModalOpen(false)}
         />
       )}
     </div>

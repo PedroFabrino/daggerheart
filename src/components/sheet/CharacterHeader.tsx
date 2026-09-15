@@ -1,21 +1,22 @@
 import React from 'react';
 import { Character } from '../../types/daggerheart';
 import { getTierForLevel } from '../../domain/combatMath';
-import { Flame, BedDouble, Wrench } from 'lucide-react';
+import { Flame, BedDouble, Wrench, Dices } from 'lucide-react';
 
 interface CharacterHeaderProps {
   character: Character;
   onOpenLevelUp?: () => void;
   onOpenRest?: () => void;
+  onOpenDiceRoll?: () => void;
   isHouseRulesEnabled: boolean;
   onToggleHouseRules: () => void;
 }
-
 
 export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
   character,
   onOpenLevelUp,
   onOpenRest,
+  onOpenDiceRoll,
   isHouseRulesEnabled,
   onToggleHouseRules,
 }) => {
@@ -87,6 +88,17 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
               </span>
             </div>
           </div>
+
+          {/* Dice Roller Button */}
+          {onOpenDiceRoll && (
+            <button
+              onClick={onOpenDiceRoll}
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-bg-secondary hover:bg-bg-hover border border-border-subtle text-text-primary transition-all shadow-xs"
+              title="Open optional Duality Dice roller"
+            >
+              <Dices className="w-4 h-4 text-hope" /> Roll Dice
+            </button>
+          )}
 
           {/* Rest Button */}
           {onOpenRest && (
