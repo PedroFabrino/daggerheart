@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useTheme } from './themes/ThemeProvider';
 import { useCharacter, CharacterProvider } from './context/CharacterContext';
 import { CharacterCreationWizard } from './components/wizard/CharacterCreationWizard';
+import { CharacterSheet } from './components/sheet/CharacterSheet';
+
 import {
   DOMAIN_CARDS,
   filterLegalDomainCards,
@@ -24,7 +26,11 @@ export const AppContent: React.FC = () => {
     cancelCreation,
     saveDraftAsNewCharacter,
     selectActiveCharacter,
+    updateActiveCharacter,
+    isHouseRulesEnabled,
+    toggleHouseRules,
   } = useCharacter();
+
 
   const [activeTab, setActiveTab] = useState<'sheet' | 'library'>('sheet');
   const [selectedDomain, setSelectedDomain] = useState<Domain | 'All'>('All');
@@ -147,163 +153,14 @@ export const AppContent: React.FC = () => {
           />
 
         ) : activeTab === 'sheet' && activeCharacter ? (
-          /* ACTIVE CHARACTER SHEET (Preview for Ticket 02, fully fleshed in Ticket 03) */
-          <div className="space-y-6">
-            {/* Header Card */}
-            <div className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-md">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-subtle pb-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-black text-text-primary">
-                      {activeCharacter.name}
-                    </h2>
-                    <span className="text-xs bg-bg-secondary px-2.5 py-0.5 rounded-full border border-border-subtle text-text-muted font-semibold">
-                      {activeCharacter.pronouns}
-                    </span>
-                  </div>
-                  <p className="text-xs text-text-muted mt-1">
-                    Level {activeCharacter.level} &middot;{' '}
-                    <span className="text-text-primary font-semibold">
-                      {activeCharacter.heritage.ancestryName}
-                    </span>{' '}
-                    {activeCharacter.className} ({activeCharacter.subclassName}) &middot;{' '}
-                    <span className="text-text-primary font-semibold">
-                      {activeCharacter.heritage.communityName}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="text-center px-3 py-1.5 bg-bg-secondary rounded-xl border border-border-subtle">
-                    <span className="text-[10px] text-text-muted font-bold block">PROFICIENCY</span>
-                    <span className="text-lg font-black text-hope">
-                      +{activeCharacter.proficiency}
-                    </span>
-                  </div>
-                  <div className="text-center px-3 py-1.5 bg-bg-secondary rounded-xl border border-border-subtle">
-                    <span className="text-[10px] text-text-muted font-bold block">EVASION</span>
-                    <span className="text-lg font-black text-text-primary">
-                      {activeCharacter.evasion}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vitals Bar */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
-                {/* Hit Points */}
-                <div className="bg-bg-secondary p-4 rounded-xl border border-border-subtle">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-text-muted uppercase">Hit Points</span>
-                    <span className="text-xs font-mono font-bold text-text-primary">
-                      {activeCharacter.hp.max - activeCharacter.hp.currentDamage} / {activeCharacter.hp.max}
-                    </span>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {Array.from({ length: activeCharacter.hp.max }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`flex-1 h-6 rounded border transition-colors ${
-                          i < activeCharacter.hp.currentDamage
-                            ? 'bg-fear/40 border-fear'
-                            : 'bg-bg-surface border-border-subtle'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Stress */}
-                <div className="bg-bg-secondary p-4 rounded-xl border border-border-subtle">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-text-muted uppercase">Stress</span>
-                    <span className="text-xs font-mono font-bold text-fear-light">
-                      {activeCharacter.stress.current} / {activeCharacter.stress.max}
-                    </span>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {Array.from({ length: activeCharacter.stress.max }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`flex-1 h-6 rounded border transition-colors ${
-                          i < activeCharacter.stress.current
-                            ? 'bg-fear border-fear'
-                            : 'bg-bg-surface border-border-subtle'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Hope */}
-                <div className="bg-bg-secondary p-4 rounded-xl border border-border-subtle">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-text-muted uppercase">Hope</span>
-                    <span className="text-xs font-mono font-bold text-hope">
-                      {activeCharacter.hope.current} / {activeCharacter.hope.max}
-                    </span>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {Array.from({ length: activeCharacter.hope.max }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`flex-1 h-6 rounded-full border transition-colors ${
-                          i < activeCharacter.hope.current
-                            ? 'bg-hope border-hope-light shadow-sm shadow-hope/30'
-                            : 'bg-bg-surface border-border-subtle'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Traits */}
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-5">
-                {Object.entries(activeCharacter.traits).map(([trait, val]) => (
-                  <div
-                    key={trait}
-                    className="bg-bg-secondary p-3 rounded-xl border border-border-subtle text-center"
-                  >
-                    <div className="text-[10px] text-text-muted font-bold uppercase">{trait}</div>
-                    <div className="text-base font-black text-text-primary mt-0.5">
-                      {val > 0 ? `+${val}` : val}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Starting Domain Cards in Loadout */}
-              <div className="mt-6 border-t border-border-subtle pt-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                    Active Loadout ({activeCharacter.loadout.length}/5)
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {activeCharacter.loadout.map((card) => (
-                    <div
-                      key={card.id}
-                      className="p-3.5 bg-bg-secondary rounded-xl border border-border-subtle relative overflow-hidden"
-                    >
-                      <div className={`absolute top-0 left-0 right-0 h-1 ${domainColorMap[card.domain]}`} />
-                      <div className="flex items-center justify-between gap-1 mb-1">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-bg-surface border border-border-subtle">
-                          Level {card.level} &middot; {card.domain}
-                        </span>
-                        <span className="text-[10px] font-mono text-hope font-semibold">
-                          ⚡ {card.recallCost} Recall
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-sm text-text-primary">{card.name}</h4>
-                      <p className="text-xs text-text-secondary mt-1 leading-relaxed">{card.text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <CharacterSheet
+            character={activeCharacter}
+            onUpdate={updateActiveCharacter}
+            isHouseRulesEnabled={isHouseRulesEnabled}
+            onToggleHouseRules={toggleHouseRules}
+          />
         ) : (
+
           /* SRD LIBRARY VIEW */
           <div className="space-y-6">
             {/* Domain Badges */}
