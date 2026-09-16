@@ -48,6 +48,7 @@ export const DualityDiceModal: React.FC<DualityDiceModalProps> = ({
   const [weaponDamageFormula, setWeaponDamageFormula] = useState<string>(
     initialWeaponDamage || ''
   );
+  const [scaleWithProficiency, setScaleWithProficiency] = useState<boolean>(true);
   const [damageResult, setDamageResult] = useState<ReturnType<
     typeof calculateWeaponDamageRoll
   > | null>(null);
@@ -92,7 +93,10 @@ export const DualityDiceModal: React.FC<DualityDiceModalProps> = ({
   // Roll Weapon Damage
   const handleRollDamage = () => {
     if (!weaponDamageFormula.trim()) return;
-    const res = calculateWeaponDamageRoll(weaponDamageFormula, character.proficiency);
+    const res = calculateWeaponDamageRoll(
+      weaponDamageFormula,
+      scaleWithProficiency ? character.proficiency : 1
+    );
     setDamageResult(res);
   };
 
@@ -367,6 +371,26 @@ export const DualityDiceModal: React.FC<DualityDiceModalProps> = ({
             >
               Roll Damage
             </button>
+          </div>
+
+          {/* Proficiency Scaling Option */}
+          <div className="flex items-center justify-between text-[11px] bg-bg-surface/60 px-3 py-2 rounded-xl border border-border-subtle">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-text-secondary hover:text-text-primary">
+              <input
+                type="checkbox"
+                checked={scaleWithProficiency}
+                onChange={(e) => setScaleWithProficiency(e.target.checked)}
+                className="w-3.5 h-3.5 rounded border-border-subtle text-hope focus:ring-hope/20 accent-hope"
+              />
+              <span className="font-semibold">
+                Scale dice with Proficiency ({scaleWithProficiency ? `×${character.proficiency}` : 'Off'})
+              </span>
+            </label>
+            <span className="text-[10px] text-text-muted italic">
+              {scaleWithProficiency
+                ? `1 die → ${character.proficiency} dice`
+                : 'Roll exact formula'}
+            </span>
           </div>
 
           {damageResult && (

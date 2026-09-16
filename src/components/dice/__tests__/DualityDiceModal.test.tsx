@@ -95,4 +95,23 @@ describe('DualityDiceModal Component - Ticket 06', () => {
     expect(screen.getByText(/Rolled 2d8/i)).toBeInTheDocument();
     expect(screen.getByText(/Total Damage/i)).toBeInTheDocument();
   });
+
+  it('allows unchecking proficiency scaling to roll exact formula (e.g. 1d8)', () => {
+    render(
+      <DualityDiceModal
+        character={mockCharacter}
+        onClose={vi.fn()}
+        initialWeaponDamage="1d8+4 phy"
+      />
+    );
+
+    // Toggle off proficiency scaling
+    const scaleCheckbox = screen.getByRole('checkbox');
+    fireEvent.click(scaleCheckbox);
+
+    const rollDmgBtn = screen.getByRole('button', { name: /roll damage/i });
+    fireEvent.click(rollDmgBtn);
+
+    expect(screen.getByText(/Rolled 1d8/i)).toBeInTheDocument();
+  });
 });
