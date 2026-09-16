@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateWeaponDamage,
   calculateDamageSeverity,
+  reduceSeverityByThreshold,
   getTierForLevel,
 } from '../combatMath';
 
@@ -64,5 +65,31 @@ describe('Combat Math & Rules Engine - Ticket 03', () => {
     expect(getTierForLevel(7)).toBe(3);
     expect(getTierForLevel(8)).toBe(4);
     expect(getTierForLevel(10)).toBe(4);
+  });
+
+  it('reduces damage severity by one threshold when marking armor slot', () => {
+    // Severe (3 HP) -> Major (2 HP)
+    expect(reduceSeverityByThreshold({ severity: 'Severe', hpDamage: 3 }, 1)).toEqual({
+      severity: 'Major',
+      hpDamage: 2,
+    });
+
+    // Major (2 HP) -> Minor (1 HP)
+    expect(reduceSeverityByThreshold({ severity: 'Major', hpDamage: 2 }, 1)).toEqual({
+      severity: 'Minor',
+      hpDamage: 1,
+    });
+
+    // Minor (1 HP) -> None (0 HP)
+    expect(reduceSeverityByThreshold({ severity: 'Minor', hpDamage: 1 }, 1)).toEqual({
+      severity: 'None',
+      hpDamage: 0,
+    });
+
+    // None (0 HP) -> None (0 HP)
+    expect(reduceSeverityByThreshold({ severity: 'None', hpDamage: 0 }, 1)).toEqual({
+      severity: 'None',
+      hpDamage: 0,
+    });
   });
 });

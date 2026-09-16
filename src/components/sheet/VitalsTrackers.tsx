@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Character } from '../../types/daggerheart';
-import { calculateDamageSeverity } from '../../domain/combatMath';
+import { calculateDamageSeverity, reduceSeverityByThreshold } from '../../domain/combatMath';
 import { Shield, Heart, Zap, Sparkles, Plus, Minus, RotateCcw } from 'lucide-react';
 
 interface VitalsTrackersProps {
@@ -56,16 +56,15 @@ export const VitalsTrackers: React.FC<VitalsTrackersProps> = ({
 
   // Quick damage resolution
   const parsedDamage = parseInt(incomingDamageInput, 10);
-  const effectiveDamage =
+  const rawEvaluation =
     !isNaN(parsedDamage) && parsedDamage > 0
-      ? useArmorReduction && character.armor.markedSlots < character.armor.maxSlots
-        ? Math.max(0, parsedDamage - character.armor.score)
-        : parsedDamage
-      : 0;
+      ? calculateDamageSeverity(parsedDamage, character.damageThresholds)
+      : null;
 
-  const evaluation = !isNaN(parsedDamage) && parsedDamage > 0
-    ? calculateDamageSeverity(effectiveDamage, character.damageThresholds)
-    : null;
+  const evaluation =
+    rawEvaluation && useArmorReduction && character.armor.markedSlots < character.armor.maxSlots
+      ? reduceSeverityByThreshold(rawEvaluation, 1)
+      : rawEvaluation;
 
   const applyEvaluatedDamage = () => {
     if (!evaluation) return;
@@ -378,14 +377,22 @@ export const VitalsTrackers: React.FC<VitalsTrackersProps> = ({
             )}
           </div>
           {character.armor.markedSlots < character.armor.maxSlots && (
-            <label className="flex items-center gap-1.5 text-[10px] text-text-muted cursor-pointer mt-1.5">
+            <label className="flex items-center gap-1.5 text-[10px] text-text-muted cursor-pointer mt-1.5 select-none hover:text-text-primary">
               <input
                 type="checkbox"
                 checked={useArmorReduction}
                 onChange={(e) => setUseArmorReduction(e.target.checked)}
-                className="rounded border-border-subtle text-hope bg-bg-secondary"
+                className="rounded border-border-subtle text-hope bg-bg-secondary focus:ring-hope/20 accent-hope"
               />
-              Mark 1 Armor Slot to absorb {character.armor.score} damage
+              <span>
+                Mark 1 Armor Slot to reduce severity by 1 threshold
+                {rawEvaluation && rawEvaluation.severity !== 'None' && (
+                  <strong className="text-hope ml-1">
+                    ({rawEvaluation.severity} →{' '}
+                    {reduceSeverityByThreshold(rawEvaluation, 1).severity})
+                  </strong>
+                )}
+              </span>
             </label>
           )}
         </div>

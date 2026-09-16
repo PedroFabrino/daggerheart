@@ -60,6 +60,33 @@ export function calculateDamageSeverity(
 }
 
 /**
+ * Reduces incoming damage severity by a number of thresholds when marking Armor Slots.
+ * Per Daggerheart SRD:
+ * "When you take damage, you can mark one Armor Slot to reduce the severity of the damage
+ * by one threshold (Severe to Major, Major to Minor, Minor to Nothing)."
+ */
+export function reduceSeverityByThreshold(
+  evaluation: DamageEvaluation,
+  steps: number = 1
+): DamageEvaluation {
+  if (steps <= 0 || evaluation.severity === 'None') return evaluation;
+
+  const severityOrder: DamageSeverity[] = ['None', 'Minor', 'Major', 'Severe'];
+  const currentIndex = severityOrder.indexOf(evaluation.severity);
+  if (currentIndex <= 0) {
+    return { severity: 'None', hpDamage: 0 };
+  }
+
+  const newIndex = Math.max(0, currentIndex - steps);
+  const newSeverity = severityOrder[newIndex];
+
+  return {
+    severity: newSeverity,
+    hpDamage: newIndex,
+  };
+}
+
+/**
  * Returns the Daggerheart Tier (1 to 4) corresponding to a character's level (1 to 10).
  * - Tier 1: Level 1
  * - Tier 2: Levels 2–4
