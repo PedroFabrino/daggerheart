@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Character, DomainCard, Domain } from '../../types/daggerheart';
 import { DomainCardComponent } from './DomainCardComponent';
 import { RecallModal } from './RecallModal';
+import { AddCustomCardModal } from './AddCustomCardModal';
 import { swapVaultToLoadout, vaultLoadoutCard, MAX_LOADOUT_CARDS } from '../../domain/cardManager';
 import { getClass, getSubclass } from '../../data/srdService';
-import { LayoutGrid, List, Search, Sparkles, Shield, Bookmark, AlertCircle } from 'lucide-react';
+import { LayoutGrid, List, Search, Sparkles, Shield, Bookmark, AlertCircle, PlusCircle } from 'lucide-react';
 
 interface CardTrayProps {
   character: Character;
@@ -20,6 +21,7 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDomain, setSelectedDomain] = useState<Domain | 'ALL'>('ALL');
   const [recallCard, setRecallCard] = useState<DomainCard | null>(null);
+  const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState<boolean>(false);
 
   const classDef = getClass(character.className);
   const subclassDef = getSubclass(character.subclassName);
@@ -27,6 +29,20 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
   const handleVaultCard = (cardId: string) => {
     const updated = vaultLoadoutCard(character, cardId);
     onUpdate(updated);
+  };
+
+  const handleAddCustomCard = (card: DomainCard, dest: 'loadout' | 'vault') => {
+    if (dest === 'loadout') {
+      onUpdate({
+        ...character,
+        loadout: [...character.loadout, card],
+      });
+    } else {
+      onUpdate({
+        ...character,
+        vault: [...character.vault, card],
+      });
+    }
   };
 
   const handleConfirmRecall = (
@@ -122,35 +138,47 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
           </button>
         </div>
 
-        {/* View Mode Switch (for loadout & vault) */}
-        {activeTab !== 'features' && (
-          <div className="flex items-center gap-1 bg-bg-secondary p-1 rounded-xl border border-border-subtle self-start sm:self-auto">
-            <button
-              type="button"
-              onClick={() => setViewMode('visual')}
-              title="Visual Card Grid"
-              className={`p-1.5 rounded-lg text-xs transition-colors ${
-                viewMode === 'visual'
-                  ? 'bg-bg-surface text-hope font-bold shadow-xs'
-                  : 'text-text-muted hover:text-text-primary'
-              }`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('compact')}
-              title="Compact Combat List"
-              className={`p-1.5 rounded-lg text-xs transition-colors ${
-                viewMode === 'compact'
-                  ? 'bg-bg-surface text-hope font-bold shadow-xs'
-                  : 'text-text-muted hover:text-text-primary'
-              }`}
-            >
-              <List className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        {/* Controls: View Mode & Custom Card Button */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setIsAddCustomModalOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-bg-secondary hover:bg-bg-hover text-text-primary border border-border-subtle transition-all shadow-xs"
+            title="Create a homebrew domain card"
+          >
+            <PlusCircle className="w-3.5 h-3.5 text-hope" />
+            <span>Custom Card</span>
+          </button>
+
+          {activeTab !== 'features' && (
+            <div className="flex items-center gap-1 bg-bg-secondary p-1 rounded-xl border border-border-subtle">
+              <button
+                type="button"
+                onClick={() => setViewMode('visual')}
+                title="Visual Card Grid"
+                className={`p-1.5 rounded-lg text-xs transition-colors ${
+                  viewMode === 'visual'
+                    ? 'bg-bg-surface text-hope font-bold shadow-xs'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('compact')}
+                title="Compact Combat List"
+                className={`p-1.5 rounded-lg text-xs transition-colors ${
+                  viewMode === 'compact'
+                    ? 'bg-bg-surface text-hope font-bold shadow-xs'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tab: LOADOUT */}
@@ -413,6 +441,15 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
           cardToEquip={recallCard}
           onConfirm={handleConfirmRecall}
           onClose={() => setRecallCard(null)}
+        />
+      )}
+
+      {/* Add Custom Homebrew Card Modal */}
+      {isAddCustomModalOpen && (
+        <AddCustomCardModal
+          character={character}
+          onAddCard={handleAddCustomCard}
+          onClose={() => setIsAddCustomModalOpen(false)}
         />
       )}
     </div>

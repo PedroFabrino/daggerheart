@@ -3,6 +3,7 @@ import { useTheme } from './themes/ThemeProvider';
 import { useCharacter, CharacterProvider } from './context/CharacterContext';
 import { CharacterCreationWizard } from './components/wizard/CharacterCreationWizard';
 import { CharacterSheet } from './components/sheet/CharacterSheet';
+import { CharacterRosterDrawer } from './components/roster/CharacterRosterDrawer';
 
 import {
   DOMAIN_CARDS,
@@ -13,6 +14,7 @@ import {
   Sparkles,
   PlusCircle,
   Search,
+  Users,
 } from 'lucide-react';
 
 
@@ -36,6 +38,7 @@ export const AppContent: React.FC = () => {
   const [selectedDomain, setSelectedDomain] = useState<Domain | 'All'>('All');
   const [selectedClass, setSelectedClass] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isRosterOpen, setIsRosterOpen] = useState<boolean>(false);
 
   const domains: Domain[] = [
     'Arcana',
@@ -106,6 +109,18 @@ export const AppContent: React.FC = () => {
                 </option>
               ))}
             </select>
+          )}
+
+          {/* Roster Drawer Button */}
+          {!isCreating && (
+            <button
+              onClick={() => setIsRosterOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-bg-surface hover:bg-bg-hover text-text-primary border border-border-subtle transition-all shadow-xs"
+              title="Open Character Roster"
+            >
+              <Users className="w-4 h-4 text-hope" />
+              <span>Roster ({characters.length})</span>
+            </button>
           )}
 
           {!isCreating && (
@@ -244,6 +259,12 @@ export const AppContent: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Slide-over Character Roster Drawer */}
+      <CharacterRosterDrawer
+        isOpen={isRosterOpen}
+        onClose={() => setIsRosterOpen(false)}
+      />
     </div>
   );
 };

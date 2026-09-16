@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Character } from '../types/daggerheart';
 import { CharacterDraft, buildStartingCharacter } from '../domain/characterCreation';
+import { duplicateCharacter as cloneCharacter } from '../domain/rosterPortability';
 import { characterRepository } from '../storage/CharacterRepository';
 
 interface CharacterContextType {
@@ -18,6 +19,7 @@ interface CharacterContextType {
   deleteCharacter: (id: string) => Promise<void>;
   exportActiveCharacter: () => string | null;
   importCharacterJSON: (jsonStr: string) => Promise<Character>;
+  duplicateCharacter: (id: string) => Promise<Character>;
   toggleHouseRules: () => void;
 }
 
@@ -121,6 +123,19 @@ export const CharacterProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return imported;
   };
 
+  const duplicateCharacterAction = async (id: string): Promise<Character> => {
+    const target = characters.find((c) => c.id === id);
+    if (!target) throw new Error('Character not found');
+    const copy = cloneCharacter(target);
+    await characterRepository.save(copy);
+    await characterRepository.setActiveId(copy.id);
+
+    const all = await characterRepository.getAll();
+    setCharacters(all);
+    setActiveIdState(copy.id);
+    return copy;
+  };
+
   const toggleHouseRules = () => setIsHouseRulesEnabled((prev) => !prev);
 
   return (
@@ -140,6 +155,7 @@ export const CharacterProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         deleteCharacter,
         exportActiveCharacter,
         importCharacterJSON,
+        duplicateCharacter: duplicateCharacterAction,
         toggleHouseRules,
       }}
     >
