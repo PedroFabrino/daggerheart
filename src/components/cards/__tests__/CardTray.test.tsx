@@ -211,4 +211,27 @@ describe('CardTray Component', () => {
     // In compact view, cards are rows with chevron expanders
     expect(screen.getByText('Deadeye')).toBeInTheDocument();
   });
+
+  it('displays Beastform button for Druid character and opens modal', () => {
+    const druidChar: Character = {
+      ...mockCharacter,
+      className: 'Druid',
+      subclassName: 'Warden of the Elements',
+    };
+
+    render(<CardTray character={druidChar} onUpdate={vi.fn()} />);
+
+    // Switch to features tab
+    const featuresTabBtn = screen.getByRole('button', { name: /features/i });
+    fireEvent.click(featuresTabBtn);
+
+    expect(screen.getByText(/Class: Druid/i)).toBeInTheDocument();
+    const beastformsBtn = screen.getAllByRole('button', { name: /beastforms/i })[0];
+    expect(beastformsBtn).toBeInTheDocument();
+
+    // Click beastforms button
+    fireEvent.click(beastformsBtn);
+
+    expect(screen.getByText('Druid Beastform Options')).toBeInTheDocument();
+  });
 });

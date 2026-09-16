@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DomainCard, Domain } from '../../types/daggerheart';
+import { FormattedFeatureText } from '../common/FormattedFeatureText';
 import { Zap, ChevronDown, ChevronUp, Archive, ArrowUpRight } from 'lucide-react';
 
 interface DomainCardProps {
@@ -87,7 +88,7 @@ export const DomainCardComponent: React.FC<DomainCardProps> = ({
 
         {isExpanded && (
           <div className="mt-2.5 pt-2.5 border-t border-border-subtle text-xs text-text-secondary leading-relaxed">
-            {card.text}
+            <FormattedFeatureText text={card.text} />
           </div>
         )}
       </div>
@@ -129,9 +130,7 @@ export const DomainCardComponent: React.FC<DomainCardProps> = ({
         </div>
 
         {/* Feature Text */}
-        <p className="text-xs text-text-secondary leading-relaxed whitespace-pre-line mb-3">
-          {card.text}
-        </p>
+        <FormattedFeatureText text={card.text} className="text-xs mb-3" />
       </div>
 
       {/* Action Footer */}

@@ -5,7 +5,9 @@ import { RecallModal } from './RecallModal';
 import { AddCustomCardModal } from './AddCustomCardModal';
 import { swapVaultToLoadout, vaultLoadoutCard, MAX_LOADOUT_CARDS } from '../../domain/cardManager';
 import { getClass, getSubclass } from '../../data/srdService';
-import { LayoutGrid, List, Search, Sparkles, Shield, Bookmark, AlertCircle, PlusCircle } from 'lucide-react';
+import { FormattedFeatureText } from '../common/FormattedFeatureText';
+import { BeastformModal } from '../druid/BeastformModal';
+import { LayoutGrid, List, Search, Sparkles, Shield, Bookmark, AlertCircle, PlusCircle, Footprints } from 'lucide-react';
 
 interface CardTrayProps {
   character: Character;
@@ -22,6 +24,7 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
   const [selectedDomain, setSelectedDomain] = useState<Domain | 'ALL'>('ALL');
   const [recallCard, setRecallCard] = useState<DomainCard | null>(null);
   const [isAddCustomModalOpen, setIsAddCustomModalOpen] = useState<boolean>(false);
+  const [isBeastformModalOpen, setIsBeastformModalOpen] = useState<boolean>(false);
 
   const classDef = getClass(character.className);
   const subclassDef = getSubclass(character.subclassName);
@@ -332,7 +335,7 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
                   {subclassDef.foundation.map((f, i) => (
                     <div key={i} className="text-xs space-y-1">
                       <h5 className="font-bold text-text-primary">{f.name}</h5>
-                      <p className="text-text-secondary leading-relaxed">{f.text}</p>
+                      <FormattedFeatureText text={f.text} />
                     </div>
                   ))}
                 </div>
@@ -348,7 +351,7 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
                       {subclassDef.specialization.map((f, i) => (
                         <div key={i} className="text-xs space-y-1">
                           <h5 className="font-bold text-text-primary">{f.name}</h5>
-                          <p className="text-text-secondary leading-relaxed">{f.text}</p>
+                          <FormattedFeatureText text={f.text} />
                         </div>
                       ))}
                     </div>
@@ -364,7 +367,7 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
                       {subclassDef.mastery.map((f, i) => (
                         <div key={i} className="text-xs space-y-1">
                           <h5 className="font-bold text-text-primary">{f.name}</h5>
-                          <p className="text-text-secondary leading-relaxed">{f.text}</p>
+                          <FormattedFeatureText text={f.text} />
                         </div>
                       ))}
                     </div>
@@ -375,23 +378,57 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
             {/* Class Inherent Features */}
             {classDef && (
               <div className="bg-bg-secondary border border-border-subtle rounded-2xl p-4 space-y-3">
-                <div className="border-b border-border-subtle pb-2">
+                <div className="flex items-center justify-between border-b border-border-subtle pb-2">
                   <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                     Class: {classDef.name}
                   </h4>
+                  {classDef.name.toLowerCase() === 'druid' && (
+                    <button
+                      type="button"
+                      onClick={() => setIsBeastformModalOpen(true)}
+                      className="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-hope/15 hover:bg-hope/25 text-hope border border-hope/30 flex items-center gap-1.5 transition-colors shadow-xs"
+                      title="Open Beastform monster forms"
+                    >
+                      <Footprints className="w-3.5 h-3.5" />
+                      <span>Beastforms</span>
+                    </button>
+                  )}
                 </div>
-                {classDef.feature && (
-                  <div className="text-xs space-y-1">
-                    <h5 className="font-bold text-text-primary">{classDef.feature.name}</h5>
-                    <p className="text-text-secondary leading-relaxed">{classDef.feature.text}</p>
-                  </div>
-                )}
+
+                {/* Render All Class Features */}
+                {(classDef.features || (classDef.feature ? [classDef.feature] : [])).map((f, i) => {
+                  const isBeastform = f.name.toLowerCase().includes('beastform');
+                  return (
+                    <div
+                      key={i}
+                      className={`text-xs space-y-1.5 ${
+                        i > 0 ? 'pt-2.5 border-t border-border-subtle' : ''
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <h5 className="font-bold text-text-primary">{f.name}</h5>
+                        {isBeastform && (
+                          <button
+                            type="button"
+                            onClick={() => setIsBeastformModalOpen(true)}
+                            className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-hope/20 hover:bg-hope/30 text-hope-light border border-hope/30 flex items-center gap-1 transition-colors"
+                          >
+                            <Footprints className="w-3 h-3" />
+                            <span>View All Forms</span>
+                          </button>
+                        )}
+                      </div>
+                      <FormattedFeatureText text={f.text} />
+                    </div>
+                  );
+                })}
+
                 {classDef.hopeFeature && (
-                  <div className="text-xs space-y-1 pt-2 border-t border-border-subtle">
+                  <div className="text-xs space-y-1.5 pt-2 border-t border-border-subtle">
                     <h5 className="font-bold text-hope flex items-center gap-1">
                       <span>Hope Feature:</span> {classDef.hopeFeature.name}
                     </h5>
-                    <p className="text-text-secondary leading-relaxed">{classDef.hopeFeature.text}</p>
+                    <FormattedFeatureText text={classDef.hopeFeature.text} />
                   </div>
                 )}
               </div>
@@ -409,7 +446,7 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
               {character.heritage.ancestryFeatures.map((f, i) => (
                 <div key={i} className="text-xs space-y-1">
                   <h5 className="font-bold text-text-primary">{f.name}</h5>
-                  <p className="text-text-secondary leading-relaxed">{f.text}</p>
+                  <FormattedFeatureText text={f.text} />
                 </div>
               ))}
             </div>
@@ -425,9 +462,9 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
                 <h5 className="font-bold text-text-primary">
                   {character.heritage.communityFeature.name}
                 </h5>
-                <p className="text-text-secondary leading-relaxed">
-                  {character.heritage.communityFeature.text}
-                </p>
+                <FormattedFeatureText
+                  text={character.heritage.communityFeature.text}
+                />
               </div>
             </div>
           </div>
@@ -452,6 +489,14 @@ export const CardTray: React.FC<CardTrayProps> = ({ character, onUpdate }) => {
           onClose={() => setIsAddCustomModalOpen(false)}
         />
       )}
+
+      {/* Beastform Monster Forms Modal */}
+      <BeastformModal
+        character={character}
+        isOpen={isBeastformModalOpen}
+        onClose={() => setIsBeastformModalOpen(false)}
+        onUpdate={onUpdate}
+      />
     </div>
   );
 };

@@ -54,6 +54,25 @@ export interface SubclassDefinition {
   mastery: Feature[];
 }
 
+export interface BeastformAttack {
+  range: string;
+  trait: TraitName;
+  damage: string;
+}
+
+export interface Beastform {
+  id: string;
+  name: string;
+  tier: number;
+  examples: string[];
+  trait?: TraitName;
+  traitBonus?: number;
+  evasionBonus?: number;
+  attack?: BeastformAttack;
+  advantages: string[];
+  features: Feature[];
+}
+
 export interface ClassDefinition {
   name: string;
   description: string;
@@ -61,6 +80,7 @@ export interface ClassDefinition {
   startingHp: number;
   startingEvasion: number;
   feature: Feature;
+  features: Feature[];
   hopeFeature: Feature;
   subclasses: [string, string];
   suggestedTraits: Record<TraitName, number>;
@@ -172,6 +192,7 @@ export interface Character {
   loadout: DomainCard[]; // Max 5 active cards
   vault: DomainCard[];   // Reserve cards
   advancementHistory: CharacterAdvancementRecord[];
+  favoriteBeastforms?: string[]; // IDs of pinned beastforms
   backgroundNotes: string;
   createdAt: string;
   updatedAt: string;

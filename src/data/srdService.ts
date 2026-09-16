@@ -5,6 +5,7 @@ import rawCommunities from './srd/communities.json';
 import rawAbilities from './srd/abilities.json';
 import rawWeapons from './srd/weapons.json';
 import rawArmor from './srd/armor.json';
+import rawBeastforms from './srd/beastforms.json';
 
 import {
   Domain,
@@ -17,6 +18,7 @@ import {
   ArmorItem,
   TraitName,
   CardType,
+  Beastform,
 } from '../types/daggerheart';
 
 // Normalized Domain Cards
@@ -60,6 +62,9 @@ export const CLASSES: ClassDefinition[] = rawClasses.map((c: any) => {
     feature: Array.isArray(c.feature) && c.feature.length > 0
       ? { name: c.feature[0].name, text: c.feature[0].text }
       : { name: 'Class Feature', text: String(c.feature || '') },
+    features: Array.isArray(c.feature)
+      ? c.feature.map((f: any) => ({ name: f.name, text: f.text }))
+      : [{ name: 'Class Feature', text: String(c.feature || '') }],
     hopeFeature: {
       name: c.hope_feature_name || 'Hope Feature',
       text: c.hope_feature_text || '',
@@ -198,5 +203,17 @@ export function getDomainCards(filter?: {
     }
     return true;
   });
+}
+
+// Normalized Beastforms
+export const BEASTFORMS: Beastform[] = rawBeastforms as Beastform[];
+
+export function getBeastformsByTier(tier?: number): Beastform[] {
+  if (tier === undefined) return BEASTFORMS;
+  return BEASTFORMS.filter((b) => b.tier === tier);
+}
+
+export function getBeastformById(id: string): Beastform | undefined {
+  return BEASTFORMS.find((b) => b.id === id);
 }
 
