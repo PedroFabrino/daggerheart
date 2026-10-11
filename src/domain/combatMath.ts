@@ -8,14 +8,45 @@
 export function calculateWeaponDamage(damageString: string, proficiency: number): string {
   if (!damageString || proficiency <= 0) return damageString;
 
+  // Check for composite dice pattern, e.g. "d8+d6 phy" or "2d8+1d6+2 phy"
+  // If string contains multiple dice terms separated by +
+  const trimmed = damageString.trim();
+  const typeMatch = trimmed.match(/\s+([a-zA-Z]+)$/);
+  const damageType = typeMatch ? typeMatch[1] : '';
+  const exprWithoutType = typeMatch ? trimmed.slice(0, -typeMatch[0].length).trim() : trimmed;
+
+  if (exprWithoutType.includes('+d') || exprWithoutType.includes('-d')) {
+    // Split on + or - while keeping delimiters
+    const parts = exprWithoutType.split(/([+-])/);
+    let result = '';
+    let currentSign = '';
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i].trim();
+      if (part === '+' || part === '-') {
+        currentSign = part;
+      } else if (part) {
+        const dMatch = part.match(/^(\d*)d(\d+)$/i);
+        if (dMatch) {
+          const count = dMatch[1] ? parseInt(dMatch[1], 10) : 1;
+          const scaled = count * proficiency;
+          result += (result ? ` ${currentSign} ` : '') + `${scaled}d${dMatch[2]}`;
+        } else {
+          result += (result ? ` ${currentSign} ` : '') + part;
+        }
+      }
+    }
+
+    return damageType ? `${result} ${damageType}` : result;
+  }
+
   // Regex to match: (optional base dice count) d (sides) (optional mod like +2 or -1) (optional damage type)
   const regex = /^(\d*)d(\d+)([+-]\d+)?(\s+[a-zA-Z]+)?$/i;
-  const match = damageString.trim().match(regex);
+  const match = trimmed.match(regex);
 
   if (!match) {
-    // If not matching standard format, prepend proficiency if starts with 'd'
-    if (damageString.trim().startsWith('d')) {
-      return `${proficiency}${damageString.trim()}`;
+    if (trimmed.startsWith('d')) {
+      return `${proficiency}${trimmed}`;
     }
     return damageString;
   }

@@ -1,6 +1,22 @@
 [
   {
     "burden": "One-Handed",
+    "damage": "d8+d6 phy",
+    "feature": [
+      {
+        "name": "I Am the Weapon",
+        "text": "+1 bonus to Evasion while equipped"
+      }
+    ],
+    "name": "Brawler’s Strike",
+    "physical_or_magical": "Physical",
+    "primary_or_secondary": "Primary",
+    "range": "Melee",
+    "tier": "1",
+    "trait": "Strength"
+  },
+  {
+    "burden": "One-Handed",
     "damage": "d8 phy",
     "feature": [
       {

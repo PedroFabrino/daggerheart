@@ -19,6 +19,10 @@ describe('Combat Math & Rules Engine - Ticket 03', () => {
     // Proficiency 3
     expect(calculateWeaponDamage('d12 phy', 3)).toBe('3d12 phy');
     expect(calculateWeaponDamage('2d6 mag', 2)).toBe('4d6 mag'); // 2 * 2 = 4 dice
+
+    // Composite dice (e.g., Brawler's Strike: d8+d6 phy)
+    expect(calculateWeaponDamage('d8+d6 phy', 1)).toBe('1d8 + 1d6 phy');
+    expect(calculateWeaponDamage('d8+d6 phy', 2)).toBe('2d8 + 2d6 phy');
   });
 
   it('evaluates damage severity against damage thresholds', () => {
