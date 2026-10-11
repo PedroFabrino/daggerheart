@@ -18,6 +18,7 @@ export interface ThemeColors {
   domainBlade: string;
   domainBone: string;
   domainCodex: string;
+  domainDread: string;
   domainGrace: string;
   domainMidnight: string;
   domainSage: string;

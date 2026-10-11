@@ -3,6 +3,7 @@ export type Domain =
   | 'Blade'
   | 'Bone'
   | 'Codex'
+  | 'Dread'
   | 'Grace'
   | 'Midnight'
   | 'Sage'

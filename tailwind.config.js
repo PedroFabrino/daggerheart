@@ -34,6 +34,7 @@ export default {
           blade: 'var(--color-domain-blade)',
           bone: 'var(--color-domain-bone)',
           codex: 'var(--color-domain-codex)',
+          dread: 'var(--color-domain-dread)',
           grace: 'var(--color-domain-grace)',
           midnight: 'var(--color-domain-midnight)',
           sage: 'var(--color-domain-sage)',

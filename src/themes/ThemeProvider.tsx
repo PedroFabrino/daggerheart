@@ -43,6 +43,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.setProperty('--color-domain-blade', colors.domainBlade);
     root.style.setProperty('--color-domain-bone', colors.domainBone);
     root.style.setProperty('--color-domain-codex', colors.domainCodex);
+    root.style.setProperty('--color-domain-dread', colors.domainDread);
     root.style.setProperty('--color-domain-grace', colors.domainGrace);
     root.style.setProperty('--color-domain-midnight', colors.domainMidnight);
     root.style.setProperty('--color-domain-sage', colors.domainSage);

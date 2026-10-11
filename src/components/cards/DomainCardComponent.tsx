@@ -16,6 +16,7 @@ const domainColorMap: Record<Domain, { bar: string; badge: string; text: string 
   Blade: { bar: 'bg-domain-blade', badge: 'bg-domain-blade/20 border-domain-blade/40', text: 'text-sky-400' },
   Bone: { bar: 'bg-domain-bone', badge: 'bg-domain-bone/20 border-domain-bone/40', text: 'text-stone-300' },
   Codex: { bar: 'bg-domain-codex', badge: 'bg-domain-codex/20 border-domain-codex/40', text: 'text-amber-400' },
+  Dread: { bar: 'bg-domain-dread', badge: 'bg-domain-dread/20 border-domain-dread/40', text: 'text-slate-400' },
   Grace: { bar: 'bg-domain-grace', badge: 'bg-domain-grace/20 border-domain-grace/40', text: 'text-pink-400' },
   Midnight: { bar: 'bg-domain-midnight', badge: 'bg-domain-midnight/20 border-domain-midnight/40', text: 'text-purple-400' },
   Sage: { bar: 'bg-domain-sage', badge: 'bg-domain-sage/20 border-domain-sage/40', text: 'text-emerald-400' },

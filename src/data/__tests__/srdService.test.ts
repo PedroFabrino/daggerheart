@@ -13,38 +13,51 @@ import {
 } from '../srdService';
 
 describe('SRD Dataset & Rules Engine - Ticket 01', () => {
-  it('loads all 9 core classes with exact domains and starting stats', () => {
-    expect(CLASSES).toHaveLength(9);
+  it('loads all 13 classes with exact domains and starting stats', () => {
+    expect(CLASSES).toHaveLength(13);
 
     const classNames = CLASSES.map((c) => c.name).sort();
     expect(classNames).toEqual([
+      'Assassin',
       'Bard',
+      'Brawler',
       'Druid',
       'Guardian',
       'Ranger',
       'Rogue',
       'Seraph',
       'Sorcerer',
+      'Warlock',
       'Warrior',
+      'Witch',
       'Wizard',
     ]);
 
     // Check specific class domains
     const druid = getClass('Druid')!;
     expect(druid).toBeDefined();
-    expect(druid.domains).toEqual(['Sage', 'Arcana']);
+    expect(druid.domains.slice().sort()).toEqual(['Arcana', 'Sage']);
     expect(druid.startingHp).toBe(6);
     expect(druid.startingEvasion).toBe(10);
 
+    const assassin = getClass('Assassin')!;
+    expect(assassin).toBeDefined();
+    expect(assassin.domains).toEqual(['Blade', 'Midnight']);
+    expect(assassin.startingEvasion).toBe(12);
+
+    const brawler = getClass('Brawler')!;
+    expect(brawler).toBeDefined();
+    expect(brawler.domains).toEqual(['Valor', 'Bone']);
+
     const guardian = getClass('Guardian')!;
-    expect(guardian.domains).toEqual(['Valor', 'Blade']);
+    expect(guardian.domains.slice().sort()).toEqual(['Blade', 'Valor']);
 
     const wizard = getClass('Wizard')!;
-    expect(wizard.domains).toEqual(['Codex', 'Splendor']);
+    expect(wizard.domains.slice().sort()).toEqual(['Codex', 'Splendor']);
   });
 
-  it('loads all 18 subclasses and pairs them correctly with their classes', () => {
-    expect(SUBCLASSES).toHaveLength(18);
+  it('loads all 26 subclasses and pairs them correctly with their classes', () => {
+    expect(SUBCLASSES).toHaveLength(26);
 
     CLASSES.forEach((c) => {
       const subclasses = getSubclassesForClass(c.name);
@@ -80,16 +93,17 @@ describe('SRD Dataset & Rules Engine - Ticket 01', () => {
     });
   });
 
-  it('loads all 189+ domain cards spanning all 9 domains and levels 1 to 10', () => {
-    expect(DOMAIN_CARDS.length).toBeGreaterThanOrEqual(189);
+  it('loads all 210 domain cards spanning all 10 domains and levels 1 to 10', () => {
+    expect(DOMAIN_CARDS.length).toBe(210);
 
     const allDomains = new Set(DOMAIN_CARDS.map((c) => c.domain));
-    expect(allDomains.size).toBe(9);
+    expect(allDomains.size).toBe(10);
     expect(Array.from(allDomains).sort()).toEqual([
       'Arcana',
       'Blade',
       'Bone',
       'Codex',
+      'Dread',
       'Grace',
       'Midnight',
       'Sage',
