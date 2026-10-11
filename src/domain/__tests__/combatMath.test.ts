@@ -4,6 +4,9 @@ import {
   calculateDamageSeverity,
   reduceSeverityByThreshold,
   getTierForLevel,
+  calculateEvasionBreakdown,
+  calculateThresholdsBreakdown,
+  calculateProficiencyBreakdown,
 } from '../combatMath';
 
 describe('Combat Math & Rules Engine - Ticket 03', () => {
@@ -96,4 +99,95 @@ describe('Combat Math & Rules Engine - Ticket 03', () => {
       hpDamage: 0,
     });
   });
+
+  it('calculates full Evasion breakdown with class, ancestry, advancements, gear, and domain cards', () => {
+    // Test 1: Bruce Leeson (Brawler, mixed Simiah without nimble, level 2 with +1 evasion advancement, sword equipped)
+    const pc1 = {
+      level: 2,
+      className: 'Brawler',
+      traits: { Agility: 3, Strength: 1, Finesse: 0, Instinct: 1, Presence: -1, Knowledge: 0 },
+      heritage: {
+        ancestryName: 'Simiah',
+        isMixedAncestry: true,
+        ancestryFeatures: [
+          { name: 'Natural Climber', text: 'Advantage on climbing' },
+          { name: 'Wings', text: 'Fly' },
+        ],
+      },
+      advancementHistory: [{ advancements: ['+1 Agility', '+1 Evasion'] }],
+      armor: { equipped: { name: 'Leather Armor', features: [] } },
+      weapons: {
+        primary: { name: 'Broadsword', features: [] },
+        secondary: null,
+      },
+      loadout: [],
+    };
+
+    const res1 = calculateEvasionBreakdown(pc1);
+    // Base 10 + Level Up 1 = 11
+    expect(res1.total).toBe(11);
+    expect(res1.breakdown.some((b) => b.source.includes('Base'))).toBe(true);
+    expect(res1.breakdown.some((b) => b.source.includes('Level Up'))).toBe(true);
+
+    // Test 2: Unarmed Brawler with Untouchable card active (+half Agility rounded up)
+    const pc2 = {
+      ...pc1,
+      weapons: { primary: null, secondary: null },
+      loadout: [{ name: 'Untouchable', text: 'Gain a bonus to your Evasion equal to half your Agility.' }],
+    };
+
+    const res2 = calculateEvasionBreakdown(pc2);
+    // Base 10 + Level Up 1 + Unarmed I Am the Weapon 1 + Untouchable (ceil(3/2) = 2) = 14
+    expect(res2.total).toBe(14);
+    expect(res2.breakdown.some((b) => b.source.includes('I Am the Weapon'))).toBe(true);
+    expect(res2.breakdown.some((b) => b.source.includes('Untouchable'))).toBe(true);
+  });
+
+  it('calculates Damage Thresholds and Armor Score with Bare Bones and standard armor', () => {
+    // Test 1: Bare Bones at Tier 2 (Level 2) with Strength 1 and unarmored
+    const bareBonesPC = {
+      level: 2,
+      traits: { Agility: 3, Strength: 1 },
+      armor: { equipped: null, score: 0, maxSlots: 0 },
+      loadout: [{ name: 'Bare Bones', text: 'Base thresholds: Tier 2: 11/24, Armor score 3 + Strength' }],
+    };
+
+    const th1 = calculateThresholdsBreakdown(bareBonesPC);
+    expect(th1.isBareBones).toBe(true);
+    expect(th1.thresholds).toEqual({ minor: 11, major: 24, severe: 25 });
+    // Armor score: 3 + Strength (1) = 4
+    expect(th1.armorScore).toBe(4);
+    expect(th1.maxArmorSlots).toBe(4);
+    expect(th1.breakdown.some((b) => b.source.includes('Bare Bones'))).toBe(true);
+
+    // Test 2: Equipped Leather Armor (Base 6/13, baseScore 3) at Level 2
+    const armoredPC = {
+      level: 2,
+      traits: { Agility: 3, Strength: 1 },
+      armor: {
+        equipped: { name: 'Leather Armor', baseScore: 3, baseThresholds: [6, 13] as [number, number] },
+        score: 3,
+        maxSlots: 3,
+      },
+      loadout: [],
+    };
+
+    const th2 = calculateThresholdsBreakdown(armoredPC);
+    expect(th2.isBareBones).toBe(false);
+    // Minor: 6 + 2 = 8, Major: 13 + 2 = 15, Severe: 15 + 1 = 16
+    expect(th2.thresholds).toEqual({ minor: 8, major: 15, severe: 16 });
+    expect(th2.armorScore).toBe(3);
+  });
+
+  it('calculates Proficiency breakdown with base and advancements', () => {
+    const res = calculateProficiencyBreakdown({
+      proficiency: 2,
+      advancementHistory: [{ advancements: ['+1 Agility', '+1 Proficiency'] }],
+    });
+
+    expect(res.total).toBe(2);
+    expect(res.breakdown.length).toBeGreaterThanOrEqual(2);
+    expect(res.breakdown[0].source).toBe('Base Proficiency');
+  });
 });
+

@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Character } from '../../types/daggerheart';
-import { calculateWeaponDamage } from '../../domain/combatMath';
+import {
+  calculateWeaponDamage,
+  calculateThresholdsBreakdown,
+  calculateEvasionBreakdown,
+} from '../../domain/combatMath';
 import { Swords, Shield, Backpack, Coins, Plus, Trash2 } from 'lucide-react';
 
 interface WeaponsAndEquipmentProps {
@@ -86,8 +90,17 @@ export const WeaponsAndEquipment: React.FC<WeaponsAndEquipmentProps> = ({
                   onClick={() => {
                     onUpdate((prev) => {
                       const removed = prev.weapons.primary;
+                      const temp = {
+                        ...prev,
+                        weapons: {
+                          ...prev.weapons,
+                          primary: null,
+                        },
+                      };
+                      const ev = calculateEvasionBreakdown(temp);
                       return {
                         ...prev,
+                        evasion: ev.total,
                         weapons: {
                           ...prev.weapons,
                           primary: null,
@@ -156,8 +169,17 @@ export const WeaponsAndEquipment: React.FC<WeaponsAndEquipmentProps> = ({
                   onClick={() => {
                     onUpdate((prev) => {
                       const removed = prev.weapons.secondary;
+                      const temp = {
+                        ...prev,
+                        weapons: {
+                          ...prev.weapons,
+                          secondary: null,
+                        },
+                      };
+                      const ev = calculateEvasionBreakdown(temp);
                       return {
                         ...prev,
+                        evasion: ev.total,
                         weapons: {
                           ...prev.weapons,
                           secondary: null,
@@ -219,41 +241,32 @@ export const WeaponsAndEquipment: React.FC<WeaponsAndEquipmentProps> = ({
                 onClick={() => {
                   onUpdate((prev) => {
                     const removed = prev.armor.equipped;
-                    // Reset armor score to 0 and recalculate thresholds per level
-                    const baseThresholds: [number, number] = [5, 11];
-                    const minor = baseThresholds[0] + prev.level;
-                    const major = baseThresholds[1] + prev.level;
-                    const severe = major + 1;
-
-                    // Remove armor evasion modifier if any
-                    let nextEvasion = prev.evasion;
-                    if (removed) {
-                      removed.features.forEach((feat) => {
-                        const lower = feat.text.toLowerCase();
-                        if (lower.includes('+1 to evasion') || lower.includes('+1 evasion')) {
-                          nextEvasion -= 1;
-                        } else if (lower.includes('-1 to evasion') || lower.includes('-1 evasion')) {
-                          nextEvasion += 1;
-                        }
-                      });
-                    }
+                    const temp = {
+                      ...prev,
+                      armor: {
+                        ...prev.armor,
+                        equipped: null,
+                      },
+                    };
+                    const th = calculateThresholdsBreakdown(temp);
+                    const ev = calculateEvasionBreakdown(temp);
 
                     return {
                       ...prev,
-                      evasion: nextEvasion,
+                      evasion: ev.total,
                       armor: {
                         equipped: null,
-                        score: 0,
-                        markedSlots: 0,
-                        maxSlots: 0,
+                        score: th.armorScore,
+                        markedSlots: Math.min(prev.armor.markedSlots, th.maxArmorSlots),
+                        maxSlots: th.maxArmorSlots,
                       },
-                      damageThresholds: { minor, major, severe },
+                      damageThresholds: th.thresholds,
                       inventory: removed ? [...prev.inventory, removed.name] : prev.inventory,
                     };
                   });
                 }}
                 className="p-1.5 text-text-muted hover:text-fear transition-colors rounded-lg hover:bg-bg-surface"
-                title="Unequip Armor (moves to inventory, removes armor score)"
+                title="Unequip Armor (moves to inventory, recalculates armor & thresholds)"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>

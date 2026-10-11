@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { Character } from '../../types/daggerheart';
-import { calculateDamageSeverity, reduceSeverityByThreshold } from '../../domain/combatMath';
+import {
+  calculateDamageSeverity,
+  reduceSeverityByThreshold,
+  calculateThresholdsBreakdown,
+} from '../../domain/combatMath';
+import { StatHoverBreakdown } from './StatHoverBreakdown';
 import { Shield, Heart, Zap, Sparkles, Plus, Minus, RotateCcw } from 'lucide-react';
 
 interface VitalsTrackersProps {
@@ -14,6 +19,11 @@ export const VitalsTrackers: React.FC<VitalsTrackersProps> = ({
 }) => {
   const [incomingDamageInput, setIncomingDamageInput] = useState<string>('');
   const [useArmorReduction, setUseArmorReduction] = useState<boolean>(true);
+
+  const thresholdsData = calculateThresholdsBreakdown(character);
+  const activeThresholds = thresholdsData.thresholds;
+  const activeArmorScore = thresholdsData.armorScore;
+  const activeMaxSlots = thresholdsData.maxArmorSlots;
 
   // HP manipulation
   const setDamage = (newDamage: number) => {
@@ -58,11 +68,11 @@ export const VitalsTrackers: React.FC<VitalsTrackersProps> = ({
   const parsedDamage = parseInt(incomingDamageInput, 10);
   const rawEvaluation =
     !isNaN(parsedDamage) && parsedDamage > 0
-      ? calculateDamageSeverity(parsedDamage, character.damageThresholds)
+      ? calculateDamageSeverity(parsedDamage, activeThresholds)
       : null;
 
   const evaluation =
-    rawEvaluation && useArmorReduction && character.armor.markedSlots < character.armor.maxSlots
+    rawEvaluation && useArmorReduction && character.armor.markedSlots < activeMaxSlots
       ? reduceSeverityByThreshold(rawEvaluation, 1)
       : rawEvaluation;
 
@@ -72,16 +82,21 @@ export const VitalsTrackers: React.FC<VitalsTrackersProps> = ({
       let nextMarkedArmor = prev.armor.markedSlots;
       if (
         useArmorReduction &&
-        prev.armor.markedSlots < prev.armor.maxSlots &&
+        prev.armor.markedSlots < activeMaxSlots &&
         parsedDamage > 0
       ) {
-        nextMarkedArmor = Math.min(prev.armor.maxSlots, prev.armor.markedSlots + 1);
+        nextMarkedArmor = Math.min(activeMaxSlots, prev.armor.markedSlots + 1);
       }
       const newDamage = Math.min(prev.hp.max, prev.hp.currentDamage + evaluation.hpDamage);
       return {
         ...prev,
         hp: { ...prev.hp, currentDamage: newDamage },
-        armor: { ...prev.armor, markedSlots: nextMarkedArmor },
+        armor: {
+          ...prev.armor,
+          markedSlots: nextMarkedArmor,
+          maxSlots: activeMaxSlots,
+          score: activeArmorScore,
+        },
       };
     });
     setIncomingDamageInput('');
@@ -285,10 +300,23 @@ export const VitalsTrackers: React.FC<VitalsTrackersProps> = ({
               <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary">
                 Armor & Thresholds
               </h3>
+              {thresholdsData.isBareBones && (
+                <span className="text-[9px] bg-hope/15 text-hope px-2 py-0.5 rounded-full font-bold border border-hope/30">
+                  Bare Bones
+                </span>
+              )}
             </div>
-            <span className="text-xs font-bold text-text-primary">
-              Score: <span className="text-hope font-mono text-sm">{character.armor.score}</span>
-            </span>
+            <StatHoverBreakdown
+              label="Score"
+              value={activeArmorScore}
+              valueColor="text-hope"
+              breakdownTitle="Armor Score Breakdown"
+              breakdown={thresholdsData.armorBreakdown}
+              totalLabel="Armor Score"
+              totalValue={`${activeArmorScore} (${activeMaxSlots} Slots)`}
+              badgeNote={thresholdsData.isBareBones ? 'Bare Bones' : undefined}
+              align="right"
+            />
           </div>
 
           {/* Armor Slots */}
@@ -296,11 +324,11 @@ export const VitalsTrackers: React.FC<VitalsTrackersProps> = ({
             <div className="flex items-center justify-between text-[10px] text-text-muted font-bold mb-1.5">
               <span>ARMOR SLOTS</span>
               <span>
-                {character.armor.maxSlots - character.armor.markedSlots} available
+                {Math.max(0, activeMaxSlots - character.armor.markedSlots)} available
               </span>
             </div>
             <div className="flex gap-1.5">
-              {Array.from({ length: character.armor.maxSlots }).map((_, i) => {
+              {Array.from({ length: activeMaxSlots }).map((_, i) => {
                 const isMarked = i < character.armor.markedSlots;
                 return (
                   <button
@@ -323,26 +351,47 @@ export const VitalsTrackers: React.FC<VitalsTrackersProps> = ({
 
           {/* Thresholds Display */}
           <div className="grid grid-cols-3 gap-2 text-center mt-3">
-            <div className="bg-bg-secondary p-2 rounded-lg border border-border-subtle">
-              <span className="text-[10px] text-text-muted font-bold block">MINOR</span>
-              <span className="text-sm font-black text-text-primary">
-                {character.damageThresholds.minor}
-              </span>
-              <span className="text-[9px] text-text-muted block">Mark 1 HP</span>
+            <div className="bg-bg-secondary p-2 rounded-lg border border-border-subtle hover:border-border-highlight transition-colors">
+              <StatHoverBreakdown
+                label="MINOR"
+                value={activeThresholds.minor}
+                subLabel="Mark 1 HP"
+                valueColor="text-text-primary"
+                breakdownTitle="Damage Thresholds Breakdown"
+                breakdown={thresholdsData.breakdown}
+                totalLabel="Thresholds"
+                totalValue={`${activeThresholds.minor} / ${activeThresholds.major} / ${activeThresholds.severe}+`}
+                badgeNote={thresholdsData.isBareBones ? 'Bare Bones Active' : undefined}
+                align="left"
+              />
             </div>
-            <div className="bg-bg-secondary p-2 rounded-lg border border-border-subtle">
-              <span className="text-[10px] text-text-muted font-bold block">MAJOR</span>
-              <span className="text-sm font-black text-hope">
-                {character.damageThresholds.major}
-              </span>
-              <span className="text-[9px] text-text-muted block">Mark 2 HP</span>
+            <div className="bg-bg-secondary p-2 rounded-lg border border-border-subtle hover:border-border-highlight transition-colors">
+              <StatHoverBreakdown
+                label="MAJOR"
+                value={activeThresholds.major}
+                subLabel="Mark 2 HP"
+                valueColor="text-hope"
+                breakdownTitle="Damage Thresholds Breakdown"
+                breakdown={thresholdsData.breakdown}
+                totalLabel="Thresholds"
+                totalValue={`${activeThresholds.minor} / ${activeThresholds.major} / ${activeThresholds.severe}+`}
+                badgeNote={thresholdsData.isBareBones ? 'Bare Bones Active' : undefined}
+                align="center"
+              />
             </div>
-            <div className="bg-bg-secondary p-2 rounded-lg border border-border-subtle">
-              <span className="text-[10px] text-text-muted font-bold block">SEVERE</span>
-              <span className="text-sm font-black text-fear-light">
-                {character.damageThresholds.severe}+
-              </span>
-              <span className="text-[9px] text-text-muted block">Mark 3 HP</span>
+            <div className="bg-bg-secondary p-2 rounded-lg border border-border-subtle hover:border-border-highlight transition-colors">
+              <StatHoverBreakdown
+                label="SEVERE"
+                value={`${activeThresholds.severe}+`}
+                subLabel="Mark 3 HP"
+                valueColor="text-fear-light"
+                breakdownTitle="Damage Thresholds Breakdown"
+                breakdown={thresholdsData.breakdown}
+                totalLabel="Thresholds"
+                totalValue={`${activeThresholds.minor} / ${activeThresholds.major} / ${activeThresholds.severe}+`}
+                badgeNote={thresholdsData.isBareBones ? 'Bare Bones Active' : undefined}
+                align="right"
+              />
             </div>
           </div>
         </div>

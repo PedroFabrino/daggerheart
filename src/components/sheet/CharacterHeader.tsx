@@ -1,6 +1,12 @@
 import React from 'react';
 import { Character } from '../../types/daggerheart';
-import { getTierForLevel } from '../../domain/combatMath';
+import {
+  getTierForLevel,
+  calculateEvasionBreakdown,
+  calculateThresholdsBreakdown,
+  calculateProficiencyBreakdown,
+} from '../../domain/combatMath';
+import { StatHoverBreakdown } from './StatHoverBreakdown';
 import { Flame, BedDouble, Wrench, Dices } from 'lucide-react';
 
 interface CharacterHeaderProps {
@@ -21,6 +27,9 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
   onToggleHouseRules,
 }) => {
   const tier = getTierForLevel(character.level);
+  const evasionData = calculateEvasionBreakdown(character);
+  const thresholdsData = calculateThresholdsBreakdown(character);
+  const proficiencyData = calculateProficiencyBreakdown(character);
 
   return (
     <div className="bg-bg-surface border border-border-subtle rounded-2xl p-6 shadow-md">
@@ -47,7 +56,6 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             </button>
           </div>
 
-
           <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted mt-1.5">
             <span className="font-bold text-hope">
               Level {character.level} (Tier {tier})
@@ -69,24 +77,71 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
 
         {/* Quick Badges & Actions */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <div className="flex items-center gap-3 bg-bg-secondary px-3.5 py-2 rounded-xl border border-border-subtle">
-            <div className="text-center">
-              <span className="text-[10px] text-text-muted font-bold block uppercase tracking-wider">
-                Proficiency
-              </span>
-              <span className="text-base font-black text-hope">
-                +{character.proficiency}
-              </span>
-            </div>
+          <div className="flex items-center gap-2.5 sm:gap-3.5 bg-bg-secondary px-3.5 py-2 rounded-xl border border-border-subtle">
+            {/* Proficiency */}
+            <StatHoverBreakdown
+              label="Proficiency"
+              value={`+${proficiencyData.total}`}
+              valueColor="text-hope"
+              breakdownTitle="Proficiency Breakdown"
+              breakdown={proficiencyData.breakdown}
+              totalLabel="Proficiency"
+              totalValue={`+${proficiencyData.total}`}
+              align="center"
+            />
+
             <div className="w-px h-6 bg-border-subtle" />
-            <div className="text-center">
-              <span className="text-[10px] text-text-muted font-bold block uppercase tracking-wider">
-                Evasion
-              </span>
-              <span className="text-base font-black text-text-primary">
-                {character.evasion}
-              </span>
-            </div>
+
+            {/* Evasion */}
+            <StatHoverBreakdown
+              label="Evasion"
+              value={evasionData.total}
+              valueColor="text-text-primary"
+              breakdownTitle="Evasion Breakdown"
+              breakdown={evasionData.breakdown}
+              totalLabel="Calculated Evasion"
+              totalValue={evasionData.total}
+              badgeNote={
+                evasionData.breakdown.some((b) => b.source.includes('Untouchable'))
+                  ? 'Untouchable Active'
+                  : evasionData.breakdown.some((b) => b.source.includes('I Am the Weapon'))
+                  ? 'I Am the Weapon'
+                  : undefined
+              }
+              align="center"
+            />
+
+            <div className="w-px h-6 bg-border-subtle" />
+
+            {/* Armor Score & Slots */}
+            <StatHoverBreakdown
+              label="Armor"
+              value={thresholdsData.armorScore}
+              subLabel={`${thresholdsData.maxArmorSlots} Slots`}
+              valueColor="text-text-primary"
+              breakdownTitle="Armor Score Breakdown"
+              breakdown={thresholdsData.armorBreakdown}
+              totalLabel="Armor Score / Slots"
+              totalValue={`${thresholdsData.armorScore} Score (${thresholdsData.maxArmorSlots} Slots)`}
+              badgeNote={thresholdsData.isBareBones ? 'Bare Bones' : undefined}
+              align="center"
+            />
+
+            <div className="w-px h-6 bg-border-subtle" />
+
+            {/* Damage Thresholds */}
+            <StatHoverBreakdown
+              label="Thresholds"
+              value={`${thresholdsData.thresholds.minor} / ${thresholdsData.thresholds.major} / ${thresholdsData.thresholds.severe}+`}
+              subLabel="Min / Maj / Sev"
+              valueColor="text-text-primary"
+              breakdownTitle="Damage Thresholds Breakdown"
+              breakdown={thresholdsData.breakdown}
+              totalLabel="Damage Thresholds"
+              totalValue={`${thresholdsData.thresholds.minor} / ${thresholdsData.thresholds.major} / ${thresholdsData.thresholds.severe}+`}
+              badgeNote={thresholdsData.isBareBones ? 'Bare Bones' : undefined}
+              align="right"
+            />
           </div>
 
           {/* Dice Roller Button */}

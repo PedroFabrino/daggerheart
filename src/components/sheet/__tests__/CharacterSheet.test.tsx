@@ -105,7 +105,7 @@ describe('CharacterSheet UI & Combat Trackers - Ticket 03', () => {
 
     // Proficiency & Evasion
     expect(screen.getAllByText('+1').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('11')).toBeInTheDocument(); // Evasion
+    expect(screen.getByText('10')).toBeInTheDocument(); // Calculated Evasion
   });
 
   it('allows clicking HP heal and mark buttons', () => {
@@ -119,11 +119,11 @@ describe('CharacterSheet UI & Combat Trackers - Ticket 03', () => {
       />
     );
 
-    const healBtn = screen.getByRole('button', { name: /Heal 1/i });
+    const healBtn = screen.getByRole('button', { name: /^Heal 1$/i });
     fireEvent.click(healBtn);
     expect(handleUpdate).toHaveBeenCalled();
 
-    const markBtn = screen.getByRole('button', { name: /Mark 1/i });
+    const markBtn = screen.getByRole('button', { name: /^Mark 1$/i });
     fireEvent.click(markBtn);
     expect(handleUpdate).toHaveBeenCalledTimes(2);
   });
@@ -163,5 +163,32 @@ describe('CharacterSheet UI & Combat Trackers - Ticket 03', () => {
     const updater = handleUpdate.mock.calls[0][0];
     const updated = updater(mockCharacter);
     expect(updated.hope.current).toBe(2);
+  });
+
+  it('displays calculated top info and opens breakdown popover on hover or click', () => {
+    const handleUpdate = vi.fn();
+    render(
+      <CharacterSheet
+        character={mockCharacter}
+        onUpdate={handleUpdate}
+        isHouseRulesEnabled={false}
+        onToggleHouseRules={vi.fn()}
+      />
+    );
+
+    // Evasion badge is rendered in header
+    const evasionBtn = screen.getByTestId('stat-breakdown-evasion');
+    expect(evasionBtn).toBeInTheDocument();
+
+    // Hover opens breakdown
+    fireEvent.mouseEnter(evasionBtn);
+    expect(screen.getByText('Evasion Breakdown')).toBeInTheDocument();
+    expect(screen.getByText(/Base \(Ranger\)/i)).toBeInTheDocument();
+
+    // Damage thresholds badge in header
+    const thresholdsBtn = screen.getByTestId('stat-breakdown-thresholds');
+    expect(thresholdsBtn).toBeInTheDocument();
+    fireEvent.mouseEnter(thresholdsBtn);
+    expect(screen.getByText('Damage Thresholds Breakdown')).toBeInTheDocument();
   });
 });
