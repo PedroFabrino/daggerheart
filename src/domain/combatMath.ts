@@ -333,6 +333,13 @@ export function calculateThresholdsBreakdown(
     level: number;
     subclassName?: string;
     traits: Record<string, number>;
+    proficiency?: number;
+    heritage?: {
+      ancestryName: string;
+      isMixedAncestry?: boolean;
+      mixedSecondaryAncestryName?: string;
+      ancestryFeatures?: { name: string; text: string }[];
+    };
     armor: {
       equipped: { name: string; baseScore: number; baseThresholds: [number, number] } | null;
       score: number;
@@ -441,6 +448,32 @@ export function calculateThresholdsBreakdown(
       source: 'Unarmored',
       value: '0',
       details: 'No armor equipped',
+    });
+  }
+
+  // Check Galapa "Shell" feature (+Proficiency to damage thresholds)
+  const ancestryFeatures = character.heritage?.ancestryFeatures || [];
+  const hasShell =
+    ancestryFeatures.some(
+      (f) =>
+        f.name?.toLowerCase().includes('shell') ||
+        f.text?.toLowerCase().includes('damage thresholds equal to your proficiency')
+    ) ||
+    (!character.heritage?.isMixedAncestry &&
+      character.heritage?.ancestryName?.toLowerCase().includes('galapa'));
+
+  if (hasShell) {
+    const profBonus =
+      character.proficiency && character.proficiency > 0
+        ? character.proficiency
+        : Math.max(1, getTierForLevel(character.level));
+    minor += profBonus;
+    major += profBonus;
+    severe += profBonus;
+    breakdown.push({
+      source: 'Ancestry (Galapa: Shell)',
+      value: `+${profBonus} to all thresholds`,
+      details: `Proficiency bonus (+${profBonus}) added to damage thresholds`,
     });
   }
 

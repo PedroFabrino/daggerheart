@@ -730,15 +730,35 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                   </span>
                 </div>
 
-                <div>
-                  <span className="text-text-muted block text-[11px]">Damage Thresholds:</span>
-                  <span className="font-bold text-text-primary">
-                    {character.damageThresholds.minor + 1} /{' '}
-                    {character.damageThresholds.major + 1} /{' '}
-                    {character.damageThresholds.severe + 1}{' '}
-                    <span className="text-domain-sage font-mono text-[10px]">(+1 each)</span>
-                  </span>
-                </div>
+                {(() => {
+                  const ancestryFeatures = character.heritage?.ancestryFeatures || [];
+                  const hasShell =
+                    ancestryFeatures.some(
+                      (f) =>
+                        f.name?.toLowerCase().includes('shell') ||
+                        f.text?.toLowerCase().includes('damage thresholds equal to your proficiency')
+                    ) ||
+                    (!character.heritage?.isMixedAncestry &&
+                      character.heritage?.ancestryName?.toLowerCase().includes('galapa'));
+                  const profAdvBonus = selectedAdvancements.filter((a) => a.type === 'proficiency').length;
+                  const totalProfGain = (isTierAchieve ? 1 : 0) + profAdvBonus;
+                  const shellBonus = hasShell ? totalProfGain : 0;
+                  const delta = 1 + shellBonus;
+
+                  return (
+                    <div>
+                      <span className="text-text-muted block text-[11px]">Damage Thresholds:</span>
+                      <span className="font-bold text-text-primary">
+                        {character.damageThresholds.minor + delta} /{' '}
+                        {character.damageThresholds.major + delta} /{' '}
+                        {character.damageThresholds.severe + delta}{' '}
+                        <span className="text-domain-sage font-mono text-[10px]">
+                          (+{delta} each{shellBonus > 0 ? ', incl. Shell' : ''})
+                        </span>
+                      </span>
+                    </div>
+                  );
+                })()}
 
                 <div>
                   <span className="text-text-muted block text-[11px]">Proficiency:</span>

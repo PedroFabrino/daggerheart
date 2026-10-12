@@ -228,6 +228,24 @@ export function applyLevelUp(
     }
   }
 
+  // If character has Galapa's Shell, any Proficiency gain also increases damage thresholds
+  const ancestryFeatures = character.heritage?.ancestryFeatures || [];
+  const hasShell =
+    ancestryFeatures.some(
+      (f) =>
+        f.name?.toLowerCase().includes('shell') ||
+        f.text?.toLowerCase().includes('damage thresholds equal to your proficiency')
+    ) ||
+    (!character.heritage?.isMixedAncestry &&
+      character.heritage?.ancestryName?.toLowerCase().includes('galapa'));
+
+  if (hasShell && nextProficiency > character.proficiency) {
+    const profGain = nextProficiency - character.proficiency;
+    nextThresholds.minor += profGain;
+    nextThresholds.major += profGain;
+    nextThresholds.severe += profGain;
+  }
+
   // 5. Apply Domain Card acquisition & exchange
   let nextLoadout = [...character.loadout];
   let nextVault = [...character.vault];

@@ -1,0 +1,153 @@
+{
+  "id": "pc-jatoba-brawler-lv2",
+  "name": "Jatobá",
+  "pronouns": "he/him",
+  "level": 2,
+  "className": "Brawler",
+  "subclassName": "Martial Artist",
+  "subclassCardState": "foundation",
+  "heritage": {
+    "ancestryName": "Simiah",
+    "isMixedAncestry": true,
+    "mixedSecondaryAncestryName": "Galapa",
+    "ancestryFeatures": [
+      {
+        "name": "Nimble",
+        "text": "Gain a permanent +1 bonus to your Evasion at character creation."
+      },
+      {
+        "name": "Shell",
+        "text": "Gain a bonus to your damage thresholds equal to your Proficiency."
+      }
+    ],
+    "communityName": "Underborne",
+    "communityFeature": {
+      "name": "Low-Light Living",
+      "text": "When you're in an area with low light or heavy shadow, you have advantage on rolls to hide, investigate, or perceive details within that area."
+    }
+  },
+  "traits": {
+    "Agility": 3,
+    "Strength": 1,
+    "Finesse": 0,
+    "Instinct": 1,
+    "Presence": -1,
+    "Knowledge": 0
+  },
+  "markedTraitsThisTier": [
+    "Agility"
+  ],
+  "evasion": 15,
+  "hp": {
+    "max": 6,
+    "currentDamage": 0
+  },
+  "stress": {
+    "max": 6,
+    "current": 0
+  },
+  "hope": {
+    "max": 6,
+    "current": 2
+  },
+  "armor": {
+    "equipped": null,
+    "score": 4,
+    "markedSlots": 0,
+    "maxSlots": 4
+  },
+  "damageThresholds": {
+    "minor": 13,
+    "major": 26,
+    "severe": 27
+  },
+  "proficiency": 2,
+  "experiences": [
+    {
+      "id": "exp-1-jatoba",
+      "name": "Ginga & Capoeira Footwork",
+      "bonus": 4
+    },
+    {
+      "id": "exp-2-jatoba",
+      "name": "Casca de Ferro (Iron Shell Defense)",
+      "bonus": 2
+    }
+  ],
+  "weapons": {
+    "primary": {
+      "name": "Brawler’s Strike",
+      "tier": 1,
+      "burden": "One-Handed",
+      "damage": "d8 phy",
+      "physicalOrMagical": "Physical",
+      "primaryOrSecondary": "Primary",
+      "range": "Melee",
+      "trait": "Agility",
+      "features": [
+        {
+          "name": "I Am the Weapon",
+          "text": "While you are unarmed, your unarmed strikes deal d8 physical damage using your Strength or Agility trait (your choice), and you gain a +1 bonus to your Evasion."
+        }
+      ]
+    },
+    "secondary": null
+  },
+  "inventory": [
+    "50 feet of rope",
+    "Torch",
+    "Basic supplies",
+    "Minor Health Potion"
+  ],
+  "gold": {
+    "handfuls": 1,
+    "bags": 0,
+    "chests": 0
+  },
+  "loadout": [
+    {
+      "id": "srd-card-190-bare-bones",
+      "name": "Bare Bones",
+      "domain": "Valor",
+      "level": 1,
+      "recallCost": 0,
+      "type": "Ability",
+      "text": "When you choose not to equip armor, you have a base Armor Score of 3 + your Strength and use the following as your base damage thresholds:\n\n  - Tier 1: 9/19\n  - Tier 2: 11/24\n  - Tier 3: 13/31\n  - Tier 4: 15/38"
+    },
+    {
+      "id": "srd-card-45-untouchable",
+      "name": "Untouchable",
+      "domain": "Bone",
+      "level": 1,
+      "recallCost": 1,
+      "type": "Ability",
+      "text": "Gain a bonus to your Evasion equal to half your Agility."
+    },
+    {
+      "id": "srd-card-46-ferocity",
+      "name": "Ferocity",
+      "domain": "Bone",
+      "level": 2,
+      "recallCost": 2,
+      "type": "Ability",
+      "text": "When you cause an adversary to mark 1 or more Hit Points, you can spend 2 Hope to increase your Evasion by the number of Hit Points they marked. This bonus lasts until after the next attack made against you."
+    }
+  ],
+  "vault": [],
+  "advancementHistory": [
+    {
+      "tier": 2,
+      "level": 2,
+      "advancements": [
+        "+1 Agility",
+        "+1 Evasion"
+      ],
+      "markedTraits": [
+        "Agility"
+      ]
+    }
+  ],
+  "backgroundNotes": "A Simiah martial artist whose agile monkey frame carries the natural, impenetrable shell of the ancient Galapa. Like the Brazilian Jatobá tree, he moves with natural flexibility and possesses wood-and-stone resilience.",
+  "createdAt": "2026-10-11T21:40:00.000Z",
+  "updatedAt": "2026-10-11T21:40:00.000Z"
+}

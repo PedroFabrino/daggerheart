@@ -83,6 +83,22 @@ export function buildStartingCharacter(draft: CharacterDraft): Character {
     : ([5, 11] as [number, number]);
 
   const thresholds = calculateStartingThresholds(armorBaseThresholds, 1);
+  const ancestryFeatures = draft.heritage?.ancestryFeatures || [];
+  const hasShell =
+    ancestryFeatures.some(
+      (f) =>
+        f.name?.toLowerCase().includes('shell') ||
+        f.text?.toLowerCase().includes('damage thresholds equal to your proficiency')
+    ) ||
+    (!draft.heritage?.isMixedAncestry &&
+      draft.heritage?.ancestryName?.toLowerCase().includes('galapa'));
+
+  if (hasShell) {
+    thresholds.minor += 1;
+    thresholds.major += 1;
+    thresholds.severe += 1;
+  }
+
   const armorScore = draft.startingArmor ? draft.startingArmor.baseScore : 0;
 
   const inventory: string[] = [

@@ -177,6 +177,29 @@ describe('Combat Math & Rules Engine - Ticket 03', () => {
     // Minor: 6 + 2 = 8, Major: 13 + 2 = 15, Severe: 15 + 1 = 16
     expect(th2.thresholds).toEqual({ minor: 8, major: 15, severe: 16 });
     expect(th2.armorScore).toBe(3);
+
+    // Test 3: Bare Bones + Galapa Shell at Level 2 (Proficiency 2)
+    const galapaBareBonesPC = {
+      level: 2,
+      proficiency: 2,
+      traits: { Agility: 3, Strength: 1 },
+      armor: { equipped: null, score: 0, maxSlots: 0 },
+      heritage: {
+        ancestryName: 'Simiah',
+        isMixedAncestry: true,
+        mixedSecondaryAncestryName: 'Galapa',
+        ancestryFeatures: [
+          { name: 'Shell', text: 'Gain a bonus to your damage thresholds equal to your Proficiency.' },
+        ],
+      },
+      loadout: [{ name: 'Bare Bones', text: 'Base thresholds: Tier 2: 11/24, Armor score 3 + Strength' }],
+    };
+
+    const th3 = calculateThresholdsBreakdown(galapaBareBonesPC);
+    expect(th3.isBareBones).toBe(true);
+    // Bare Bones Tier 2: 11 / 24 / 25 + Galapa Shell (Proficiency 2): +2 = 13 / 26 / 27
+    expect(th3.thresholds).toEqual({ minor: 13, major: 26, severe: 27 });
+    expect(th3.breakdown.some((b) => b.source.includes('Galapa: Shell'))).toBe(true);
   });
 
   it('calculates Proficiency breakdown with base and advancements', () => {

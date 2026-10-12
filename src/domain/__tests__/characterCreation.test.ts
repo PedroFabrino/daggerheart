@@ -169,4 +169,59 @@ describe('Character Creation Rules Engine - Ticket 02', () => {
     expect(character.inventory).toContain('Minor Health Potion');
     expect(character.gold.handfuls).toBe(1);
   });
+
+  it('builds a Galapa character with Shell proficiency bonus added to starting damage thresholds', () => {
+    const draft: CharacterDraft = {
+      name: 'Tortuga',
+      pronouns: 'he/him',
+      className: 'Warrior',
+      subclassName: 'Juggernaut',
+      heritage: {
+        ancestryName: 'Galapa',
+        isMixedAncestry: false,
+        ancestryFeatures: [
+          { name: 'Shell', text: 'Gain a bonus to your damage thresholds equal to your Proficiency.' },
+        ],
+        communityName: 'Underborne',
+        communityFeature: { name: 'Low-Light Living', text: 'Dark vision' },
+      },
+      traits: {
+        Agility: 0,
+        Strength: 2,
+        Finesse: 0,
+        Instinct: 1,
+        Presence: 1,
+        Knowledge: -1,
+      },
+      startingArmor: {
+        name: 'Gambeson Armor',
+        tier: 1,
+        baseScore: 3,
+        baseThresholds: [5, 11],
+        features: [],
+      },
+      startingPrimaryWeapon: {
+        name: 'Battleaxe',
+        tier: 1,
+        burden: 'One-Handed',
+        damage: 'd10 phy',
+        physicalOrMagical: 'Physical',
+        primaryOrSecondary: 'Primary',
+        range: 'Melee',
+        trait: 'Strength',
+        features: [],
+      },
+      startingSecondaryWeapon: null,
+      startingPotion: 'Minor Health Potion',
+      experiences: [],
+      startingDomainCards: [],
+      backgroundNotes: 'Galapa juggernaut warrior.',
+    };
+
+    const character = buildStartingCharacter(draft);
+    // Base 5/11 + Level 1 = 6/12/13. Shell (+Proficiency 1) adds +1 to all -> 7 / 13 / 14
+    expect(character.damageThresholds.minor).toBe(7);
+    expect(character.damageThresholds.major).toBe(13);
+    expect(character.damageThresholds.severe).toBe(14);
+  });
 });

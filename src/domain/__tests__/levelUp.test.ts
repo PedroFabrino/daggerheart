@@ -174,4 +174,39 @@ describe('levelUp Domain Engine - Ticket 05', () => {
     expect(leveled8.proficiency).toBe(4);
     expect(leveled8.subclassCardState).toBe('mastery');
   });
+
+  it('scales damage thresholds with proficiency increases on level up for Galapa Shell', () => {
+    const galapaChar: Character = {
+      ...baseCharacter,
+      level: 1,
+      proficiency: 1,
+      heritage: {
+        ...baseCharacter.heritage,
+        ancestryName: 'Galapa',
+        isMixedAncestry: false,
+        ancestryFeatures: [
+          { name: 'Shell', text: 'Gain a bonus to your damage thresholds equal to your Proficiency.' },
+        ],
+      },
+      damageThresholds: { minor: 6, major: 12, severe: 13 },
+    };
+
+    const payload: LevelUpPayload = {
+      advancements: [
+        { type: 'trait', trait: 'Agility', slotsCost: 1 },
+        { type: 'hp', slotsCost: 1 },
+      ],
+      newCard: sampleCard,
+      tierExperienceAllocations: [{ experienceId: 'exp-1', bonusAmount: 2 }],
+    };
+
+    // Level 1 -> 2: Level increases (+1 thresholds) AND Proficiency increases 1 -> 2 (+1 Shell bonus)
+    const leveled = applyLevelUp(galapaChar, payload);
+    expect(leveled.level).toBe(2);
+    expect(leveled.proficiency).toBe(2);
+    // Base 6 + 1 (lvl) + 1 (prof increase) = 8
+    expect(leveled.damageThresholds.minor).toBe(8);
+    expect(leveled.damageThresholds.major).toBe(14);
+    expect(leveled.damageThresholds.severe).toBe(15);
+  });
 });
